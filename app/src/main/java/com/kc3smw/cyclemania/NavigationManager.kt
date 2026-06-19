@@ -7,6 +7,10 @@ import com.graphhopper.GHResponse
 import com.graphhopper.GraphHopper
 import com.graphhopper.GraphHopperConfig
 import com.graphhopper.config.Profile
+import com.graphhopper.routing.WeightingFactory
+import com.graphhopper.routing.ev.RoadClass
+import com.graphhopper.routing.ev.VehicleAccess
+import com.graphhopper.routing.ev.VehicleSpeed
 import com.graphhopper.util.Instruction
 import com.graphhopper.util.Parameters
 import com.graphhopper.util.shapes.GHPoint
@@ -78,17 +82,18 @@ class NavigationManager(private val context: Context) {
     private fun tryGraphHopperInit(pbfFile: File, graphDir: File): Boolean {
         return try {
             // CustomProfile/CustomModel use Janino runtime bytecode compilation which
-            // Android ART rejects. Use standard profiles with built-in weightings only.
-            val fastest  = Profile("bike_fastest").setVehicle("bike").setWeighting("fastest")
-            val shortest = Profile("bike_shortest").setVehicle("bike").setWeighting("shortest")
+            // Android ART rejects. Use standard profiles + a custom WeightingFactory
+            // (BikeQuietWeighting) that reads road_class encoded values at routing time.
+            val fastest = Profile("bike_fastest").setVehicle("bike").setWeighting("fastest")
+            val quiet   = Profile("bike_quiet").setVehicle("bike").setWeighting("bike_quiet")
             val config = GraphHopperConfig()
-            config.setProfiles(listOf(fastest, shortest))
+            config.setProfiles(listOf(fastest, quiet))
             config.putObject("datareader.file", pbfFile.absolutePath)
             config.putObject("graph.location", graphDir.absolutePath)
             config.putObject("graph.dataaccess", "MMAP")
             config.putObject("import.osm.ignored_highways", "")
             Log.i("NavigationManager", "Starting GraphHopper init from ${pbfFile.name} into ${graphDir.absolutePath}")
-            val gh = GraphHopper()
+            val gh = CycleManiaGraphHopper()
             gh.init(config)
             Log.i("NavigationManager", "gh.init done, calling importOrLoad")
             gh.importOrLoad()
@@ -101,13 +106,32 @@ class NavigationManager(private val context: Context) {
         }
     }
 
-    // Maps the routing_mode preference to a pre-built profile name.
-    // "fastest"  → bike_fastest (default)
-    // "balanced" → bike_shortest (avoids long arterial stretches)
-    // "safest"   → bike_shortest (same — shortest tends to favour quieter roads)
+    // Maps the routing_mode preference to a registered profile name.
+    // "fastest"          → bike_fastest (standard GH fastest weighting for bike)
+    // "balanced"/"safest"→ bike_quiet   (BikeQuietWeighting — penalises major roads)
     private fun profileForMode(): String = when (routingMode()) {
-        "balanced", "safest" -> "bike_shortest"
+        "balanced", "safest" -> "bike_quiet"
         else -> "bike_fastest"
+    }
+
+    // GraphHopper subclass that plugs in BikeQuietWeighting without Janino.
+    // createWeighting() is final in GH 7.0, but createWeightingFactory() is protected.
+    private class CycleManiaGraphHopper : GraphHopper() {
+        override fun createWeightingFactory(): WeightingFactory {
+            val base = super.createWeightingFactory()
+            return WeightingFactory { profile, hints, disableTurnCosts ->
+                if (profile.weighting == "bike_quiet") {
+                    val em = getEncodingManager()
+                    BikeQuietWeighting(
+                        em.getBooleanEncodedValue(VehicleAccess.key("bike")),
+                        em.getDecimalEncodedValue(VehicleSpeed.key("bike")),
+                        em.getEnumEncodedValue(RoadClass.KEY, RoadClass::class.java)
+                    )
+                } else {
+                    base.createWeighting(profile, hints, disableTurnCosts)
+                }
+            }
+        }
     }
 
     // Route computation runs on IO; state is assigned on the calling (main) thread
