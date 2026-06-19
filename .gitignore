@@ -1,12 +1,7 @@
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+.idea/
 .DS_Store
 /build
 app/build
@@ -28,10 +23,14 @@ release.properties
 
 # Claude Code / agent files
 CLAUDE.md
-app/CLAUDE.md
+app/CLAUDE*.md
 AGENT.md
 LOG.txt
 .claude/
+*.md.bak
+# Any stray docs from other projects
+*.docx
+*.doc
 
 # Nextcloud conflict files
 *_conflict*
