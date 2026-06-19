@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FF2E7D32</color>
+    <color name="colorPrimaryDark">#FF1B5E20</color>
+    <color name="colorAccent">#FF66BB6A</color>
+    <color name="darkBackground">#FF0A120A</color>
+    <color name="surfaceColor">#FF0F1F0F</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="trackColor">#FFEF5350</color>
+    <color name="routeColor">#FF42A5F5</color>
+    <color name="waypointPin">#FF388E3C</color>
+    <color name="textPrimary">#FFFFFFFF</color>
+    <color name="textSecondary">#FFA5D6A7</color>
+    <color name="statBackground">#FF1B5E20</color>
+    <color name="recordActive">#FFEF5350</color>
+</resources>

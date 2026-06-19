@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Rear wheel (center 11,35 radius 8) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="3"
+        android:pathData="M3,35 A8,8 0 1,1 19,35 A8,8 0 1,1 3,35 Z"/>
+
+    <!-- Front wheel (center 37,35 radius 8) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="3"
+        android:pathData="M29,35 A8,8 0 1,1 45,35 A8,8 0 1,1 29,35 Z"/>
+
+    <!-- Rear wheel hub -->
+    <path
+        android:fillColor="#42A5F5"
+        android:pathData="M9,35 A2,2 0 1,1 13,35 A2,2 0 1,1 9,35 Z"/>
+
+    <!-- Front wheel hub -->
+    <path
+        android:fillColor="#42A5F5"
+        android:pathData="M35,35 A2,2 0 1,1 39,35 A2,2 0 1,1 35,35 Z"/>
+
+    <!-- Frame: seat tube (saddle area to BB) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="2.5"
+        android:pathData="M22,20 L24,35"/>
+
+    <!-- Frame: top tube -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="2.5"
+        android:pathData="M22,20 L34,19"/>
+
+    <!-- Frame: down tube (BB to head tube) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="2.5"
+        android:pathData="M24,35 L34,19"/>
+
+    <!-- Frame: chain stays (BB to rear dropout) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="2.5"
+        android:pathData="M24,35 L11,35"/>
+
+    <!-- Frame: seat stays (saddle area to rear dropout) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="2"
+        android:pathData="M22,20 L11,35"/>
+
+    <!-- Fork (head tube to front dropout) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="2.5"
+        android:pathData="M34,19 L37,35"/>
+
+    <!-- Head tube -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="2"
+        android:pathData="M34,16 L36,23"/>
+
+    <!-- Saddle (white horizontal bar) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:fillColor="#00000000"
+        android:pathData="M17,19 L27,19"/>
+
+    <!-- Seat post -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="2"
+        android:pathData="M22,19 L22,23"/>
+
+    <!-- Handlebars (white) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:fillColor="#00000000"
+        android:pathData="M30,14 L40,14"/>
+
+    <!-- Stem -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="2"
+        android:pathData="M34,14 L35,18"/>
+
+</vector>

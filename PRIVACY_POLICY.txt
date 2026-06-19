@@ -1,0 +1,72 @@
+PRIVACY POLICY — MY CYCLE MANIA
+Last updated: June 2026
+Developer: KC3SMW
+
+─────────────────────────────────────────────────────────────────────────────
+
+SHORT VERSION
+My Cycle Mania collects no personal data. Everything stays on your phone.
+
+─────────────────────────────────────────────────────────────────────────────
+
+FULL POLICY
+
+1. DATA WE COLLECT
+   My Cycle Mania collects NO personal information whatsoever.
+   We do not collect your name, email address, location history,
+   device identifiers, or any other personal data.
+
+2. GPS / LOCATION
+   The app uses your device's GPS to display your position on the map
+   and to record your rides. This data is processed entirely on your
+   device and is never transmitted to any server, third party, or
+   external service.
+
+   Ride tracks and GPS recordings are saved only to your phone's local
+   storage (in the app's private files folder) and are never uploaded
+   anywhere.
+
+3. INTERNET ACCESS
+   The app requests INTERNET permission solely to allow you to download
+   OpenStreetMap tile files and routing data (OSM PBF files) during the
+   one-time offline setup. Once those files are downloaded, the app
+   operates entirely offline. No background data is ever sent or received.
+
+4. IN-APP PURCHASES
+   The optional "Buy Me a Coffee" tip is processed entirely through
+   Google Play Billing. KC3SMW does not receive or store any payment
+   information. All transaction handling is managed by Google.
+   See Google's privacy policy: https://policies.google.com/privacy
+
+5. CRASH REPORTING / ANALYTICS
+   The app contains no analytics SDKs, crash reporters, advertising
+   networks, or tracking of any kind.
+
+6. THIRD-PARTY LIBRARIES
+   The app uses the following open-source libraries, all of which
+   operate entirely on-device:
+   - OSMDroid (OpenStreetMap tile rendering)
+   - GraphHopper (offline bicycle routing)
+   - Google Play Services Location (FusedLocationProvider — on-device GPS)
+
+7. DATA RETENTION
+   Since no data is collected, there is nothing to retain or delete.
+   Ride files stored on your device can be deleted at any time by
+   uninstalling the app or clearing app data in Android settings.
+
+8. CHILDREN
+   The app does not knowingly collect data from anyone, including
+   children under 13.
+
+9. CHANGES TO THIS POLICY
+   If this policy changes, the updated version will be posted at the
+   URL listed in the Play Store listing. The "Last updated" date above
+   will reflect any changes.
+
+10. CONTACT
+    Questions about this privacy policy:
+    GitHub: https://github.com/chengmania/MyCycleMania/issues
+
+─────────────────────────────────────────────────────────────────────────────
+This policy applies to the Android app "My Cycle Mania"
+Package: com.kc3smw.cyclemania

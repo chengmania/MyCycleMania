@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="units_entries">
+        <item>Kilometers (km)</item>
+        <item>Miles (mi)</item>
+    </string-array>
+    <string-array name="units_values">
+        <item>km</item>
+        <item>mi</item>
+    </string-array>
+
+    <string-array name="routing_mode_entries">
+        <item>Fastest — shortest time, any road</item>
+        <item>Balanced — avoids highways and busy roads</item>
+        <item>Safest — strongly prefers quiet roads and bike paths</item>
+    </string-array>
+    <string-array name="routing_mode_values">
+        <item>fastest</item>
+        <item>balanced</item>
+        <item>safest</item>
+    </string-array>
+</resources>

@@ -1,0 +1,136 @@
+GOOGLE PLAY STORE LISTING — MY CYCLE MANIA
+Copy-paste reference for the Google Play Developer Console
+─────────────────────────────────────────────────────────────────────────────
+
+APP DETAILS
+  App name:          My Cycle Mania
+  Package name:      com.kc3smw.cyclemania
+  Developer name:    KC3SMW
+  Version:           1.0 (versionCode 1)
+  Category:          Sports  (secondary: Maps & Navigation)
+  Content rating:    Everyone
+  Pricing:           Free
+
+─────────────────────────────────────────────────────────────────────────────
+
+SHORT DESCRIPTION  (max 80 characters — paste into "Short description")
+
+Offline cycling navigation. Maps, routing, ride recording. No accounts.
+
+─────────────────────────────────────────────────────────────────────────────
+
+FULL DESCRIPTION  (paste into "Full description")
+
+My Cycle Mania is a passion project built by a cyclist, for cyclists. It's completely free — no ads, no accounts, no subscription, no data plan required once you're set up.
+
+The goal was simple: build a fully offline cycling app that actually works when you're deep in the countryside with no signal.
+
+━━ FEATURES ━━
+
+🗺  OFFLINE MAPS
+Powered by OpenStreetMap. Download your region once over Wi-Fi and your maps work forever — no internet needed on the road.
+
+🚴  OFFLINE TURN-BY-TURN NAVIGATION
+Bicycle routing powered by GraphHopper. Voice guidance announces street names, distances, and turn directions. Routes are calculated on your device with zero data.
+
+📍  WAYPOINT ROUTE PLANNING
+Long-press anywhere on the map to drop waypoints. The app instantly calculates your route, shows estimated distance and time, and draws the line on screen. Drag waypoints to adjust.
+
+📡  GPS RIDE RECORDING
+Records your full track in the background even with the screen off. Live stats show distance, duration, and current speed while you ride.
+
+⛰  ELEVATION TRACKING
+Tracks elevation gain throughout your ride.
+
+📄  GPX EXPORT
+Every completed ride is automatically saved as a GPX file you can import into Strava, Komoot, Garmin Connect, or any other platform.
+
+🏁  RIDE SUMMARY
+At the end of each ride you get a full summary: total distance, duration, average speed, max speed, and elevation gain — with a map thumbnail and the option to save a screenshot to your gallery.
+
+🗂  CYCLE MAP OVERLAY
+Switch between standard OSM and CyclOSM — a map layer designed specifically for cyclists showing bike lanes, trails, and terrain.
+
+🏔  TERRAIN OVERLAY
+Toggle an OpenTopoMap layer to see elevation contours while planning.
+
+☕  SUPPORT THE PROJECT
+Like the app? Buy the developer a coffee through Google Play — totally optional, always appreciated.
+
+━━ FIRST-TIME SETUP ━━
+
+My Cycle Mania is fully offline, which means you need to download two things before your first ride:
+
+1. MAP TILES — The visual map for your region. For Eastern PA this is roughly 30 MB. Tap the menu → Download Map Tiles to get started.
+
+2. ROUTING DATA — An OpenStreetMap PBF file for your state or region (Pennsylvania is ~120 MB). This is the road network GraphHopper uses to calculate your routes. Tap the menu → Download Routing Data to grab it.
+
+After downloading, the app builds a routing index on your device the first time. This takes a few minutes — you'll see a notification saying "Building routing index." When it says "My Cycle Mania is ready!" you're all set and every route after that is instant.
+
+Both downloads only need to happen once. You can do it at home on Wi-Fi and then ride all day with your phone in airplane mode.
+
+━━ WHAT IT DOESN'T DO ━━
+
+✗  No Google Maps (we use OpenStreetMap only)
+✗  No internet required after setup
+✗  No accounts or sign-in
+✗  No ads or tracking
+✗  No subscription
+
+━━ OPEN SOURCE ━━
+
+My Cycle Mania is open source under the MIT license.
+Source: https://github.com/chengmania/MyCycleMania
+
+Built with GraphHopper • OSMDroid • OpenStreetMap contributors
+
+─────────────────────────────────────────────────────────────────────────────
+
+KEYWORDS / TAGS  (use in keyword field if available)
+cycling, bike navigation, offline maps, GPX, ride recording, openstreetmap,
+bicycle routing, offline navigation, cycle computer, no internet
+
+─────────────────────────────────────────────────────────────────────────────
+
+PRIVACY POLICY URL  (required — paste into "Privacy policy" field)
+https://chengmania.github.io/MyCycleMania/privacy
+
+─────────────────────────────────────────────────────────────────────────────
+
+IN-APP PRODUCT SETUP  (Monetize → Products → In-app products)
+
+  Product ID:    tip_coffee
+  Name:          Buy Me a Coffee ☕
+  Description:   Support the developer — buy them a coffee! Totally optional.
+  Type:          Consumable (Managed product — lets them tip more than once)
+  Price:         $1.99  (suggested — adjust as you like)
+  Status:        Active
+
+  NOTE: In-app products only become available in the console after you
+  upload your first APK/AAB to any track (even Internal Testing).
+
+─────────────────────────────────────────────────────────────────────────────
+
+CONTENT RATING QUESTIONNAIRE  (Store presence → Content rating)
+  Violence:          No
+  Sexual content:    No
+  Profanity:         No
+  Drugs/alcohol:     No
+  User interaction:  No (no accounts, no chat, no user content)
+  Location sharing:  No (GPS stays on device)
+  Likely rating:     Everyone
+
+─────────────────────────────────────────────────────────────────────────────
+
+APP CATEGORY
+  Primary:    Sports
+  Secondary:  Maps & Navigation
+
+─────────────────────────────────────────────────────────────────────────────
+
+WHAT'S NEW (Version 1.0 — Initial Release)
+First release of My Cycle Mania. Fully offline cycling navigation with
+maps, turn-by-turn routing, ride recording, GPX export, and waypoint
+planning. No ads, no accounts, no internet required after setup.
+
+─────────────────────────────────────────────────────────────────────────────

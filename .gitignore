@@ -1,0 +1,37 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+app/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Build outputs
+*.apk
+*.aab
+
+# Signing (never commit)
+*.jks
+*.keystore
+*.p12
+keystore.properties
+release.properties
+
+# Claude Code / agent files
+CLAUDE.md
+app/CLAUDE.md
+AGENT.md
+LOG.txt
+.claude/
+
+# Nextcloud conflict files
+*_conflict*

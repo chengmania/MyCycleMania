@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        android:key="units"
+        android:title="@string/pref_units_title"
+        android:entries="@array/units_entries"
+        android:entryValues="@array/units_values"
+        android:defaultValue="km"
+        app:useSimpleSummaryProvider="true" />
+
+    <SeekBarPreference
+        android:key="tts_speed"
+        android:title="@string/pref_tts_speed_title"
+        android:defaultValue="10"
+        android:max="20"
+        app:min="5"
+        app:showSeekBarValue="true" />
+
+    <SeekBarPreference
+        android:key="default_zoom"
+        android:title="@string/pref_default_zoom_title"
+        android:defaultValue="15"
+        android:max="19"
+        app:min="8"
+        app:showSeekBarValue="true" />
+
+    <androidx.preference.SwitchPreferenceCompat
+        android:key="keep_screen_on"
+        android:title="Keep Screen On"
+        android:summary="Prevent screen from sleeping while the app is open"
+        android:defaultValue="true" />
+
+    <PreferenceCategory android:title="App">
+
+        <androidx.preference.Preference
+            android:key="about"
+            android:title="@string/about"
+            android:summary="Version info, credits, and support the developer" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Routing">
+
+        <androidx.preference.ListPreference
+            android:key="routing_mode"
+            android:title="@string/pref_routing_mode_title"
+            android:entries="@array/routing_mode_entries"
+            android:entryValues="@array/routing_mode_values"
+            android:defaultValue="fastest"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Offline Data">
+
+        <androidx.preference.Preference
+            android:key="download_map_tiles"
+            android:title="@string/download_region"
+            android:summary="Download offline map tiles for your riding area" />
+
+        <androidx.preference.Preference
+            android:key="download_routing_data"
+            android:title="@string/download_routing"
+            android:summary="Download road network data for offline navigation" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
