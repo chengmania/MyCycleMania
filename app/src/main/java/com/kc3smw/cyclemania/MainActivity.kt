@@ -25,6 +25,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -111,7 +115,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_main)
+        applyWindowInsets()
 
         mapFragment = MapFragment()
         mapFragment.onLongPressListener = { geoPoint -> onMapLongPress(geoPoint) }
@@ -171,6 +177,24 @@ class MainActivity : AppCompatActivity() {
         createNotificationChannel()
         checkAndRequestPermissions()
         checkSafetyDisclaimer()
+    }
+
+    private fun applyWindowInsets() {
+        val statsBarView = findViewById<View>(R.id.stats_bar)
+        val statsBarTopPadding = statsBarView.paddingTop
+        val bottomControls = findViewById<View>(R.id.bottom_controls)
+        val bottomControlsBottomPadding = bottomControls.paddingBottom
+
+        ViewCompat.setOnApplyWindowInsetsListener(statsBarView) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            v.updatePadding(top = statsBarTopPadding + bars.top)
+            insets
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(bottomControls) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(bottom = bottomControlsBottomPadding + bars.bottom)
+            insets
+        }
     }
 
     private fun checkSafetyDisclaimer() {
