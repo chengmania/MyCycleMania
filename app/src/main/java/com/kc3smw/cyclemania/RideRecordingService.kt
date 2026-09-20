@@ -31,6 +31,7 @@ class RideRecordingService : Service() {
     val location: LiveData<android.location.Location> = _location
 
     private lateinit var fusedClient: FusedLocationProviderClient
+    private lateinit var altitudeTracker: BarometerAltitudeTracker
     private var wakeLock: PowerManager.WakeLock? = null
     private var isRecording = false
 
@@ -39,7 +40,8 @@ class RideRecordingService : Service() {
             result.lastLocation?.let { loc ->
                 _location.postValue(loc)
                 if (isRecording) {
-                    recorder.addPoint(loc.latitude, loc.longitude, loc.altitude, loc.speed)
+                    val fusedAltitude = altitudeTracker.fuse(loc.altitude)
+                    recorder.addPoint(loc.latitude, loc.longitude, fusedAltitude, loc.speed)
                     _stats.postValue(recorder.currentStats())
                 }
             }
@@ -49,6 +51,8 @@ class RideRecordingService : Service() {
     override fun onCreate() {
         super.onCreate()
         fusedClient = LocationServices.getFusedLocationProviderClient(this)
+        altitudeTracker = BarometerAltitudeTracker(this)
+        altitudeTracker.start()
         createNotificationChannel()
     }
 
@@ -62,6 +66,7 @@ class RideRecordingService : Service() {
 
     override fun onDestroy() {
         fusedClient.removeLocationUpdates(locationCallback)
+        altitudeTracker.stop()
         wakeLock?.release()
         super.onDestroy()
     }

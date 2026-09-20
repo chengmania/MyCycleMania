@@ -1,199 +1,243 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/darkBackground">
 
-    <!-- Map showing the completed ride track -->
+    <!-- Full-screen, interactive/zoomable map showing the completed ride track -->
     <org.osmdroid.views.MapView
         android:id="@+id/summary_map"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="match_parent" />
 
-    <!-- Stats grid -->
-    <GridLayout
-        android:layout_width="match_parent"
+    <!-- Stats + hill summary overlay card. Positioned dynamically at runtime
+         (top-left/top-right/bottom-left/bottom-right) to whichever corner has
+         the least overlap with the drawn route. Starts top-end by default. -->
+    <LinearLayout
+        android:id="@+id/overlay_card"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:background="@color/surfaceColor"
-        android:columnCount="3"
-        android:padding="12dp">
+        android:layout_gravity="top|end"
+        android:layout_margin="12dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_overlay_card"
+        android:padding="10dp">
 
-        <!-- Distance -->
+        <!-- Hill rating -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="8dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
+            <TextView
+                android:id="@+id/tv_hill_rating"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/hills_flat"
+                android:textColor="@color/textPrimary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="6dp">
+            <TextView
+                android:id="@+id/tv_hill_ascent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="↑ 0 ft"
+                android:textColor="@color/textSecondary"
+                android:textSize="11sp" />
+            <TextView
+                android:id="@+id/tv_hill_descent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="↓ 0 ft"
+                android:textColor="@color/textSecondary"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <com.kc3smw.cyclemania.ElevationChartView
+            android:id="@+id/elevation_chart"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginBottom="8dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#33FFFFFF"
+            android:layout_marginBottom="6dp" />
+
+        <!-- Compact stat rows -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/distance"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
             <TextView
                 android:id="@+id/tv_total_distance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0.0 km"
                 android:textColor="@color/colorAccent"
-                android:textSize="20sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/distance"
-                android:textColor="@color/textSecondary"
-                android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- Duration -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="8dp">
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/duration"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
             <TextView
                 android:id="@+id/tv_total_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="00:00:00"
-                android:textColor="@color/white"
-                android:textSize="20sp"
+                android:textColor="@color/textPrimary"
+                android:textSize="12sp"
                 android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/duration"
-                android:textColor="@color/textSecondary"
-                android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- Avg Speed -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="8dp">
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/avg_speed"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
             <TextView
                 android:id="@+id/tv_avg_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0.0"
-                android:textColor="@color/white"
-                android:textSize="20sp"
+                android:textColor="@color/textPrimary"
+                android:textSize="12sp"
                 android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/avg_speed"
-                android:textColor="@color/textSecondary"
-                android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- Max Speed -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="8dp">
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/max_speed"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
             <TextView
                 android:id="@+id/tv_max_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0.0"
-                android:textColor="@color/white"
-                android:textSize="20sp"
+                android:textColor="@color/textPrimary"
+                android:textSize="12sp"
                 android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/max_speed"
-                android:textColor="@color/textSecondary"
-                android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- Elevation Gain -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="8dp">
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/elevation_gain"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
             <TextView
                 android:id="@+id/tv_elevation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0 m"
-                android:textColor="@color/white"
-                android:textSize="20sp"
+                android:textColor="@color/textPrimary"
+                android:textSize="12sp"
                 android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/elevation_gain"
-                android:textColor="@color/textSecondary"
-                android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- Placeholder for grid symmetry -->
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_columnWeight="1" />
-
-    </GridLayout>
-
-    <!-- Action buttons -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="@color/surfaceColor">
-
-        <Button
-            android:id="@+id/btn_save_screenshot"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            android:text="@string/save_screenshot"
-            android:backgroundTint="@color/colorAccent" />
-
-        <Button
-            android:id="@+id/btn_share"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:text="@string/share"
-            android:backgroundTint="@color/colorPrimary" />
-
     </LinearLayout>
 
+    <!-- Action buttons, pinned to the bottom over the map -->
     <LinearLayout
+        android:id="@+id/bottom_button_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingBottom="8dp"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
         android:background="@color/surfaceColor">
 
-        <Button
-            android:id="@+id/btn_convert_route"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/save_route"
-            android:backgroundTint="@color/colorAccent" />
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <Button
+                android:id="@+id/btn_save_screenshot"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="@string/save_screenshot"
+                android:backgroundTint="@color/colorAccent" />
+
+            <Button
+                android:id="@+id/btn_share"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="@string/share"
+                android:backgroundTint="@color/colorPrimary" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="8dp">
+
+            <Button
+                android:id="@+id/btn_convert_route"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/save_route"
+                android:backgroundTint="@color/colorAccent" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

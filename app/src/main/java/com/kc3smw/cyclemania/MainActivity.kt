@@ -66,6 +66,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvDistance: TextView
     private lateinit var tvDuration: TextView
     private lateinit var tvSpeed: TextView
+    private lateinit var tvAltitude: TextView
+    private lateinit var tvGrade: TextView
     private lateinit var routeInfoPanel: View
     private lateinit var tvRouteDistance: TextView
     private lateinit var tvRouteTime: TextView
@@ -171,6 +173,8 @@ class MainActivity : AppCompatActivity() {
         tvDistance = findViewById(R.id.tv_distance)
         tvDuration = findViewById(R.id.tv_duration)
         tvSpeed = findViewById(R.id.tv_speed)
+        tvAltitude = findViewById(R.id.tv_altitude)
+        tvGrade = findViewById(R.id.tv_grade)
         routeInfoPanel = findViewById(R.id.route_info_panel)
         tvRouteDistance = findViewById(R.id.tv_route_distance)
         tvRouteTime = findViewById(R.id.tv_route_time)
@@ -351,7 +355,7 @@ class MainActivity : AppCompatActivity() {
                 RideHistoryStore.saveRide(this@MainActivity, finalStats, avgSpeed, points)
             }
             ttsManager.speak("Ride stopped")
-            launchRideSummary(finalStats)
+            launchRideSummary(finalStats, points)
         }
     }
 
@@ -690,9 +694,21 @@ class MainActivity : AppCompatActivity() {
 
         val speedVal = if (useKm) stats.currentSpeedKph else stats.currentSpeedKph / 1.60934f
         tvSpeed.text = String.format("%.1f", speedVal)
+
+        val altStr = if (useKm) String.format("%.0f m", stats.currentAltitudeMeters)
+        else String.format("%.0f ft", stats.currentAltitudeMeters * 3.28084)
+        tvAltitude.text = altStr
+
+        val grade = stats.currentGradePercent
+        val arrow = when {
+            grade > 1.0 -> "↑"
+            grade < -1.0 -> "↓"
+            else -> ""
+        }
+        tvGrade.text = String.format(Locale.US, "%.0f%% %s", grade, arrow).trim()
     }
 
-    private fun launchRideSummary(stats: RideStats) {
+    private fun launchRideSummary(stats: RideStats, points: List<TrackPoint>) {
         val svc = recordingService ?: return
         val intent = Intent(this, RideSummaryActivity::class.java).apply {
             putExtra(RideSummaryActivity.EXTRA_DISTANCE, stats.distanceMeters)
@@ -700,10 +716,9 @@ class MainActivity : AppCompatActivity() {
             putExtra(RideSummaryActivity.EXTRA_AVG_SPEED, svc.recorder.avgSpeedKph())
             putExtra(RideSummaryActivity.EXTRA_MAX_SPEED, stats.maxSpeedKph)
             putExtra(RideSummaryActivity.EXTRA_ELEVATION, stats.elevationGainMeters)
-            val lats = svc.recorder.trackPoints.map { it.latitude }.toDoubleArray()
-            val lons = svc.recorder.trackPoints.map { it.longitude }.toDoubleArray()
-            putExtra(RideSummaryActivity.EXTRA_LATS, lats)
-            putExtra(RideSummaryActivity.EXTRA_LONS, lons)
+            putExtra(RideSummaryActivity.EXTRA_LATS, points.map { it.latitude }.toDoubleArray())
+            putExtra(RideSummaryActivity.EXTRA_LONS, points.map { it.longitude }.toDoubleArray())
+            putExtra(RideSummaryActivity.EXTRA_ALTS, points.map { it.altitude }.toDoubleArray())
         }
         startActivity(intent)
     }

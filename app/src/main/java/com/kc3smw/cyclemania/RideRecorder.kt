@@ -15,7 +15,9 @@ data class RideStats(
     val durationMs: Long = 0L,
     val currentSpeedKph: Float = 0f,
     val maxSpeedKph: Float = 0f,
-    val elevationGainMeters: Double = 0.0
+    val elevationGainMeters: Double = 0.0,
+    val currentAltitudeMeters: Double = 0.0,
+    val currentGradePercent: Double = 0.0
 )
 
 class RideRecorder {
@@ -28,6 +30,12 @@ class RideRecorder {
     private var maxSpeedKph = 0f
     private var elevationGainMeters = 0.0
     private var lastAltitude = Double.NaN
+    private var currentGradePercent = 0.0
+
+    // Trailing window of (cumulative distance, altitude) used to compute a
+    // smoothed live grade over the last GRADE_WINDOW_METERS of travel, rather
+    // than a single noisy point-to-point delta.
+    private val gradeWindow = ArrayDeque<Pair<Double, Double>>()
 
     fun start() {
         trackPoints.clear()
@@ -37,6 +45,8 @@ class RideRecorder {
         maxSpeedKph = 0f
         elevationGainMeters = 0.0
         lastAltitude = Double.NaN
+        currentGradePercent = 0.0
+        gradeWindow.clear()
         isPaused = false
     }
 
@@ -61,13 +71,31 @@ class RideRecorder {
             val last = trackPoints.last()
             totalDistanceMeters += haversineMeters(last.latitude, last.longitude, lat, lon)
         }
-        if (!lastAltitude.isNaN() && alt > lastAltitude) {
-            elevationGainMeters += alt - lastAltitude
+        if (!lastAltitude.isNaN()) {
+            val delta = alt - lastAltitude
+            // Ignore sub-noise-floor deltas so small sensor jitter doesn't
+            // silently accumulate into a wildly overstated total gain.
+            if (delta > ELEVATION_NOISE_THRESHOLD_METERS) elevationGainMeters += delta
         }
         lastAltitude = alt
+        updateLiveGrade(alt)
         val kph = speed * 3.6f
         if (kph > maxSpeedKph) maxSpeedKph = kph
         trackPoints.add(point)
+    }
+
+    private fun updateLiveGrade(alt: Double) {
+        gradeWindow.addLast(totalDistanceMeters to alt)
+        while (gradeWindow.isNotEmpty() && totalDistanceMeters - gradeWindow.first().first > GRADE_WINDOW_METERS) {
+            gradeWindow.removeFirst()
+        }
+        val oldest = gradeWindow.firstOrNull() ?: return
+        val runMeters = totalDistanceMeters - oldest.first
+        currentGradePercent = if (runMeters >= MIN_GRADE_RUN_METERS) {
+            (alt - oldest.second) / runMeters * 100.0
+        } else {
+            0.0
+        }
     }
 
     fun currentStats(): RideStats {
@@ -79,7 +107,9 @@ class RideRecorder {
             durationMs = elapsed.coerceAtLeast(0L),
             currentSpeedKph = currentKph,
             maxSpeedKph = maxSpeedKph,
-            elevationGainMeters = elevationGainMeters
+            elevationGainMeters = elevationGainMeters,
+            currentAltitudeMeters = lastAltitude.takeUnless { it.isNaN() } ?: 0.0,
+            currentGradePercent = currentGradePercent
         )
     }
 
@@ -89,6 +119,10 @@ class RideRecorder {
     }
 
     companion object {
+        private const val ELEVATION_NOISE_THRESHOLD_METERS = 0.3
+        private const val GRADE_WINDOW_METERS = 25.0
+        private const val MIN_GRADE_RUN_METERS = 8.0
+
         fun haversineMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
             val r = 6_371_000.0
             val dLat = Math.toRadians(lat2 - lat1)

@@ -14,6 +14,13 @@
     <string name="max_speed">Max Speed</string>
     <string name="elevation_gain">Elevation Gain</string>
     <string name="current_speed">Speed</string>
+    <string name="altitude">Altitude</string>
+    <string name="grade">Grade</string>
+    <string name="hills_flat">Flat</string>
+    <string name="hills_rolling">Rolling hills</string>
+    <string name="hills_moderate">Moderate hills</string>
+    <string name="hills_steep">Steep hills</string>
+    <string name="hills_very_steep">Very steep hills</string>
     <string name="save_screenshot">Save Screenshot</string>
     <string name="share">Share</string>
     <string name="clear_route">Clear Route</string>
