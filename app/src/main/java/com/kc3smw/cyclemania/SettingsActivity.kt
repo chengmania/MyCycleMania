@@ -10,6 +10,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.applyBarInsets(findViewById(android.R.id.content))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         title = getString(R.string.settings)
         supportFragmentManager.beginTransaction()
@@ -36,6 +37,14 @@ class SettingsActivity : AppCompatActivity() {
             }
             findPreference<Preference>("download_routing_data")?.setOnPreferenceClickListener {
                 startActivity(Intent(requireContext(), DownloadRoutingDataActivity::class.java))
+                true
+            }
+            findPreference<Preference>("ride_history")?.setOnPreferenceClickListener {
+                startActivity(Intent(requireContext(), RideHistoryActivity::class.java))
+                true
+            }
+            findPreference<Preference>("saved_routes")?.setOnPreferenceClickListener {
+                startActivity(Intent(requireContext(), SavedRoutesActivity::class.java))
                 true
             }
         }

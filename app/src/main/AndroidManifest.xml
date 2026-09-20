@@ -55,6 +55,18 @@
             android:parentActivityName=".MainActivity" />
 
         <activity
+            android:name=".RideHistoryActivity"
+            android:exported="false"
+            android:label="@string/ride_history"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".SavedRoutesActivity"
+            android:exported="false"
+            android:label="@string/saved_routes"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/settings"

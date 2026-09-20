@@ -66,6 +66,7 @@ class DownloadRegionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_download_region)
+        window.applyBarInsets(findViewById(android.R.id.content), top = false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         title = getString(R.string.download_region)
 

@@ -53,6 +53,20 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Rides &amp; Routes">
+
+        <androidx.preference.Preference
+            android:key="ride_history"
+            android:title="@string/ride_history"
+            android:summary="Browse and review past rides" />
+
+        <androidx.preference.Preference
+            android:key="saved_routes"
+            android:title="@string/saved_routes"
+            android:summary="Browse, rename, and delete saved routes" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="Offline Data">
 
         <androidx.preference.Preference

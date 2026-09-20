@@ -178,4 +178,22 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
+        android:background="@color/surfaceColor">
+
+        <Button
+            android:id="@+id/btn_convert_route"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/save_route"
+            android:backgroundTint="@color/colorAccent" />
+
+    </LinearLayout>
+
 </LinearLayout>

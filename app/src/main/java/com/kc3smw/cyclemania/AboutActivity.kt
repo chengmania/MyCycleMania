@@ -12,6 +12,7 @@ class AboutActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
+        window.applyBarInsets(findViewById(android.R.id.content))
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         title = getString(R.string.about)

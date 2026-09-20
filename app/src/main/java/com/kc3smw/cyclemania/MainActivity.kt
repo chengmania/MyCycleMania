@@ -15,8 +15,10 @@ import android.os.IBinder
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -110,8 +112,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val savedRoutesLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val id = result.data?.getLongExtra(SavedRoutesActivity.EXTRA_LOADED_ROUTE_ID, -1L) ?: -1L
+            if (id != -1L) loadSavedRoute(id)
+        }
+    }
+
     private var setupCheckDone = false
     private var suppressRouteErrorToast = false
+    private var currentBottomBarsInset = 0
+    private var fabColumnBaseMarginPx = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -171,6 +184,7 @@ class MainActivity : AppCompatActivity() {
         fabOrientation.setOnClickListener { toggleOrientation() }
         fabRecenter.setOnClickListener { mapFragment.setFollowMode(true) }
         findViewById<View>(R.id.btn_clear_route).setOnClickListener { clearRoute() }
+        findViewById<View>(R.id.btn_save_route).setOnClickListener { promptSaveRoute() }
         // Default is north-up, so orientation FAB starts with colorPrimary (not colorAccent)
         fabOrientation.backgroundTintList = ContextCompat.getColorStateList(this, R.color.colorPrimary)
 
@@ -184,6 +198,11 @@ class MainActivity : AppCompatActivity() {
         val statsBarTopPadding = statsBarView.paddingTop
         val bottomControls = findViewById<View>(R.id.bottom_controls)
         val bottomControlsBottomPadding = bottomControls.paddingBottom
+        val routeInfoPanelView = findViewById<View>(R.id.route_info_panel)
+        val routeInfoPanelBaseMargin = (routeInfoPanelView.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
+        val fabColumnRightView = findViewById<View>(R.id.fab_column_right)
+        val fabColumnRightBaseMargin = (fabColumnRightView.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
+        fabColumnBaseMarginPx = fabColumnRightBaseMargin
 
         ViewCompat.setOnApplyWindowInsetsListener(statsBarView) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
@@ -192,7 +211,16 @@ class MainActivity : AppCompatActivity() {
         }
         ViewCompat.setOnApplyWindowInsetsListener(bottomControls) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            currentBottomBarsInset = bars.bottom
             v.updatePadding(bottom = bottomControlsBottomPadding + bars.bottom)
+            // bottom_controls grew by bars.bottom, so anything anchored above it
+            // (by a fixed margin) needs that same amount added to clear it.
+            val routeLp = routeInfoPanelView.layoutParams as ViewGroup.MarginLayoutParams
+            routeLp.bottomMargin = routeInfoPanelBaseMargin + bars.bottom
+            routeInfoPanelView.layoutParams = routeLp
+            val fabLp = fabColumnRightView.layoutParams as ViewGroup.MarginLayoutParams
+            fabLp.bottomMargin = fabColumnBaseMarginPx + bars.bottom
+            fabColumnRightView.layoutParams = fabLp
             insets
         }
     }
@@ -312,10 +340,15 @@ class MainActivity : AppCompatActivity() {
             val finalStats = svc.stopRecording()
             fabRecord.setImageResource(android.R.drawable.ic_media_play)
             fabPause.visibility = View.GONE
-            val points = svc.recorder.trackPoints
+            statsBar.visibility = View.GONE
+            val points = svc.recorder.trackPoints.toList()
             val gpxFile = GpxExporter.export(this, points, finalStats.distanceMeters)
             if (gpxFile != null) {
                 Toast.makeText(this, getString(R.string.gpx_saved, gpxFile.name), Toast.LENGTH_LONG).show()
+            }
+            val avgSpeed = svc.recorder.avgSpeedKph()
+            lifecycleScope.launch(Dispatchers.IO) {
+                RideHistoryStore.saveRide(this@MainActivity, finalStats, avgSpeed, points)
             }
             ttsManager.speak("Ride stopped")
             launchRideSummary(finalStats)
@@ -366,7 +399,68 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDownloadMenu() {
-        startActivity(Intent(this, SettingsActivity::class.java))
+        val options = arrayOf(
+            getString(R.string.download_region),
+            getString(R.string.download_routing),
+            getString(R.string.ride_history),
+            getString(R.string.saved_routes),
+            getString(R.string.settings)
+        )
+        AlertDialog.Builder(this)
+            .setTitle(R.string.more_options)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> startActivity(Intent(this, DownloadRegionActivity::class.java))
+                    1 -> startActivity(Intent(this, DownloadRoutingDataActivity::class.java))
+                    2 -> startActivity(Intent(this, RideHistoryActivity::class.java))
+                    3 -> savedRoutesLauncher.launch(Intent(this, SavedRoutesActivity::class.java))
+                    4 -> startActivity(Intent(this, SettingsActivity::class.java))
+                }
+            }
+            .show()
+    }
+
+    private fun promptSaveRoute() {
+        if (navigationManager.routePoints.isEmpty()) return
+        val pad = (16 * resources.displayMetrics.density).toInt()
+        val editText = EditText(this).apply {
+            hint = getString(R.string.route_name_hint)
+            setPadding(pad, pad / 2, pad, pad / 2)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.save_route_title)
+            .setView(editText)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val name = editText.text.toString().trim()
+                if (name.isEmpty()) return@setPositiveButton
+                val waypoints = waypointManager.waypoints
+                val routePoints = navigationManager.routePoints
+                val distance = navigationManager.routeDistanceMeters
+                val time = navigationManager.routeTimeSeconds
+                lifecycleScope.launch {
+                    val id = withContext(Dispatchers.IO) {
+                        SavedRouteStore.saveRoute(this@MainActivity, name, waypoints, routePoints, distance, time)
+                    }
+                    if (id != null) {
+                        Toast.makeText(this@MainActivity, getString(R.string.route_saved, name), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@MainActivity, R.string.route_save_failed, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun loadSavedRoute(id: Long) {
+        lifecycleScope.launch {
+            val route = withContext(Dispatchers.IO) { SavedRouteStore.loadRoute(this@MainActivity, id) } ?: return@launch
+            waypointManager.loadWaypoints(route.waypoints)
+            // Re-route from the loaded waypoints (rather than just replaying the stored
+            // polyline) so NavigationManager gets real turn-by-turn instructions/distance —
+            // needed for TTS guidance and for Save Route to work on the loaded route.
+            onWaypointsChanged()
+        }
     }
 
     private fun checkOfflineData() {
@@ -566,7 +660,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setFabColumnBottomMargin(dp: Int) {
-        val px = (dp * resources.displayMetrics.density).toInt()
+        fabColumnBaseMarginPx = (dp * resources.displayMetrics.density).toInt()
+        val px = fabColumnBaseMarginPx + currentBottomBarsInset
         val params = fabColumnRight.layoutParams as android.view.ViewGroup.MarginLayoutParams
         params.bottomMargin = px
         fabColumnRight.requestLayout()

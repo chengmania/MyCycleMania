@@ -122,6 +122,15 @@
             android:gravity="center" />
 
         <Button
+            android:id="@+id/btn_save_route"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save_route"
+            android:textSize="11sp"
+            android:backgroundTint="@color/colorAccent"
+            android:textColor="@color/white" />
+
+        <Button
             android:id="@+id/btn_clear_route"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -8,10 +8,16 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
@@ -33,10 +39,17 @@ class RideSummaryActivity : AppCompatActivity() {
     private lateinit var tvElevation: TextView
     private lateinit var btnSaveScreenshot: Button
     private lateinit var btnShare: Button
+    private lateinit var btnConvertRoute: Button
+
+    private var currentLats: DoubleArray = doubleArrayOf()
+    private var currentLons: DoubleArray = doubleArrayOf()
+    private var currentDistanceMeters: Double = 0.0
+    private var currentDurationMs: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ride_summary)
+        window.applyBarInsets(findViewById(android.R.id.content), top = false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         Configuration.getInstance().userAgentValue = packageName
@@ -49,15 +62,97 @@ class RideSummaryActivity : AppCompatActivity() {
         tvElevation = findViewById(R.id.tv_elevation)
         btnSaveScreenshot = findViewById(R.id.btn_save_screenshot)
         btnShare = findViewById(R.id.btn_share)
+        btnConvertRoute = findViewById(R.id.btn_convert_route)
 
-        val distMeters = intent.getDoubleExtra(EXTRA_DISTANCE, 0.0)
-        val durationMs = intent.getLongExtra(EXTRA_DURATION_MS, 0L)
-        val avgSpeed = intent.getFloatExtra(EXTRA_AVG_SPEED, 0f)
-        val maxSpeed = intent.getFloatExtra(EXTRA_MAX_SPEED, 0f)
-        val elevation = intent.getDoubleExtra(EXTRA_ELEVATION, 0.0)
-        val lats = intent.getDoubleArrayExtra(EXTRA_LATS) ?: doubleArrayOf()
-        val lons = intent.getDoubleArrayExtra(EXTRA_LONS) ?: doubleArrayOf()
+        val rideId = intent.getLongExtra(EXTRA_RIDE_ID, -1L)
+        if (rideId != -1L) {
+            // Disable actions that depend on ride data until the async load below finishes,
+            // so a tap in that window can't silently no-op or capture an unpopulated map.
+            btnSaveScreenshot.isEnabled = false
+            btnShare.isEnabled = false
+            btnConvertRoute.isEnabled = false
+            lifecycleScope.launch {
+                val ride = withContext(Dispatchers.IO) { RideHistoryStore.loadRide(this@RideSummaryActivity, rideId) }
+                if (ride == null) {
+                    Toast.makeText(this@RideSummaryActivity, R.string.ride_not_found, Toast.LENGTH_SHORT).show()
+                    finish()
+                    return@launch
+                }
+                currentLats = ride.trackPoints.map { it.latitude }.toDoubleArray()
+                currentLons = ride.trackPoints.map { it.longitude }.toDoubleArray()
+                currentDistanceMeters = ride.distanceMeters
+                currentDurationMs = ride.durationMs
+                bindStats(ride.distanceMeters, ride.durationMs, ride.avgSpeedKph, ride.maxSpeedKph, ride.elevationGainMeters)
+                setupMap(currentLats, currentLons)
+                btnSaveScreenshot.isEnabled = true
+                btnShare.isEnabled = true
+                btnConvertRoute.isEnabled = true
+            }
+        } else {
+            val distMeters = intent.getDoubleExtra(EXTRA_DISTANCE, 0.0)
+            val durationMs = intent.getLongExtra(EXTRA_DURATION_MS, 0L)
+            val avgSpeed = intent.getFloatExtra(EXTRA_AVG_SPEED, 0f)
+            val maxSpeed = intent.getFloatExtra(EXTRA_MAX_SPEED, 0f)
+            val elevation = intent.getDoubleExtra(EXTRA_ELEVATION, 0.0)
+            currentLats = intent.getDoubleArrayExtra(EXTRA_LATS) ?: doubleArrayOf()
+            currentLons = intent.getDoubleArrayExtra(EXTRA_LONS) ?: doubleArrayOf()
+            currentDistanceMeters = distMeters
+            currentDurationMs = durationMs
 
+            bindStats(distMeters, durationMs, avgSpeed, maxSpeed, elevation)
+            setupMap(currentLats, currentLons)
+        }
+
+        btnSaveScreenshot.setOnClickListener { saveScreenshot() }
+        btnShare.setOnClickListener { shareScreenshot() }
+        btnConvertRoute.setOnClickListener { promptConvertToRoute() }
+    }
+
+    private fun promptConvertToRoute() {
+        if (currentLats.size < 2) return
+        val pad = (16 * resources.displayMetrics.density).toInt()
+        val editText = EditText(this).apply {
+            hint = getString(R.string.route_name_hint)
+            setPadding(pad, pad / 2, pad, pad / 2)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.save_route_title)
+            .setView(editText)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val name = editText.text.toString().trim()
+                if (name.isEmpty()) return@setPositiveButton
+                val routePoints = currentLats.indices.map { GeoPoint(currentLats[it], currentLons[it]) }
+                val waypoints = decimate(routePoints, MAX_ROUTE_WAYPOINTS)
+                val distance = currentDistanceMeters
+                val timeSec = currentDurationMs / 1000.0
+                lifecycleScope.launch {
+                    val id = withContext(Dispatchers.IO) {
+                        SavedRouteStore.saveRoute(this@RideSummaryActivity, name, waypoints, routePoints, distance, timeSec)
+                    }
+                    if (id != null) {
+                        Toast.makeText(this@RideSummaryActivity, getString(R.string.route_saved, name), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@RideSummaryActivity, R.string.route_save_failed, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun decimate(points: List<GeoPoint>, maxCount: Int): List<GeoPoint> {
+        if (points.size <= maxCount) return points
+        val step = (points.size - 1).toDouble() / (maxCount - 1)
+        return (0 until maxCount).map { i -> points[(i * step).toInt().coerceAtMost(points.size - 1)] }
+    }
+
+    private fun bindStats(
+        distMeters: Double,
+        durationMs: Long,
+        avgSpeed: Float,
+        maxSpeed: Float,
+        elevation: Double
+    ) {
         val useKm = PreferenceManager.getDefaultSharedPreferences(this).getString("units", "km") == "km"
         tvTotalDistance.text = if (useKm) String.format("%.2f km", distMeters / 1000.0)
         else String.format("%.2f mi", distMeters / 1609.34)
@@ -75,11 +170,6 @@ class RideSummaryActivity : AppCompatActivity() {
         val elevationStr = if (useKm) String.format("%.0f m", elevation)
         else String.format("%.0f ft", elevation * 3.28084)
         tvElevation.text = elevationStr
-
-        setupMap(lats, lons)
-
-        btnSaveScreenshot.setOnClickListener { saveScreenshot() }
-        btnShare.setOnClickListener { shareScreenshot() }
     }
 
     private fun setupMap(lats: DoubleArray, lons: DoubleArray) {
@@ -172,5 +262,7 @@ class RideSummaryActivity : AppCompatActivity() {
         const val EXTRA_ELEVATION = "extra_elevation"
         const val EXTRA_LATS = "extra_lats"
         const val EXTRA_LONS = "extra_lons"
+        const val EXTRA_RIDE_ID = "extra_ride_id"
+        private const val MAX_ROUTE_WAYPOINTS = 15
     }
 }

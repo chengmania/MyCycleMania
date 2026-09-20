@@ -45,6 +45,7 @@ class DownloadRoutingDataActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_download_routing)
+        window.applyBarInsets(findViewById(android.R.id.content))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         title = getString(R.string.download_routing)
 
